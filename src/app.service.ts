@@ -1,17 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
+import { DotenvConfigOutput } from "dotenv";
 
 @Injectable()
 export class AppService {
-  public databaseType:string;
-  public databaseUrl:string;
+  public environment: DotenvConfigOutput;
 
   constructor() {
-    let environment = require('dotenv').config({path: __dirname + '/environment.env'})
-    this.databaseType = environment.parsed['DATABASE_TYPE'];
-    this.databaseUrl = environment.parsed['DATABASE_URL'];
+    let path = __dirname + "/environment.env";
+    console.log("current environment path " + path);
+    this.environment = require("dotenv").config({
+      path: path
+    });
 
   }
+
   getHello(): string {
-    return 'Hello Petshop Store Clients!';
+    return "Hello Petshop Store Clients!";
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get } from '@nestjs/common';
 
 @Controller('animal')
 export class AnimalController {
@@ -6,5 +6,4 @@ export class AnimalController {
   findAll(): string {
     return 'This action returns all animals';
   }
-
 }

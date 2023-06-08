@@ -1,15 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { AppService } from "../app.service";
-import { Animal } from "../animal/animal.interface";
-import { Database } from "./database.interface";
+import { AppService } from '../app.service';
+import { Animal } from '../animal/animal.interface';
+import { Database } from './database.interface';
+import { MongoDatabase } from '../mongo.database/mongo.database';
+import { MysqlDatabase } from "../mysql.database/mysql.database";
 
 @Injectable()
 export class DatabaseService {
-
-  private database:Database;
+  private database: Database;
+  private databaseType: string;
+  private databaseUrl: string;
+  private collectionName:string;
+  private databaseName:string;
+  private databaseUser:string;
+  private databasePassword:string;
 
   constructor(private readonly appService: AppService) {
+    this.databaseType = appService.environment.parsed['DATABASE_TYPE'];
+    this.databaseUrl = appService.environment.parsed['DATABASE_URL'];
+    this.databaseName = appService.environment.parsed['DATABASE_NAME'];
+    this.collectionName = appService.environment.parsed['COLLECTION_NAME'];
+    this.databaseUser = appService.environment.parsed['DATABASE_USER'];
+    this.databasePassword = appService.environment.parsed['DATABASE_PASSWORD'];
 
+    if (this.databaseType === 'mongoDB') {
+      this.database = new MongoDatabase(this.databaseUrl);
+    } else {
+      this.database = new MysqlDatabase(this.databaseUrl,
+        this.databaseUser,this.databasePassword,this.databaseName);
+    }
   }
   connect: () => Promise<void>;
   getAllAnimals: () => Promise<Animal[]>;

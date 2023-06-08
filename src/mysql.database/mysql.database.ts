@@ -1,9 +1,36 @@
 import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
+import { Connection, QueryError } from "mysql2";
 
-export class MysqlDatabase implements Database  {
+const mysql = require("mysql");
+
+export class MysqlDatabase implements Database {
+  private connection: Connection;
+
+  constructor(private readonly databaseUrl: string,
+              private readonly databaseUser: string,
+              private readonly databasePassword: string,
+              private readonly databaseName: string) {
+    this.connection = mysql.createConnection({
+      host: databaseUrl,
+      user: databaseUser,
+      password: databasePassword,
+      database: databaseName
+    });
+  }
+
   connect(): Promise<void> {
-    return Promise.resolve(undefined);
+    return new Promise((resolve, reject) => {
+      this.connection.connect(function(err: QueryError) {
+        if (err) {
+          return console.error("error: " + err.message);
+          reject(err);
+        } else {
+          console.log("Connected to the MySQL server.");
+          resolve();
+        }
+      });
+    });
   }
 
   createAnimal(animal: Animal): Promise<number> {

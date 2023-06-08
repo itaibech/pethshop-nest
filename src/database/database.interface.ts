@@ -1,4 +1,4 @@
-import { Animal } from "../animal/animal.interface";
+import { Animal } from '../animal/animal.interface';
 
 export interface Database {
   connect: () => Promise<void>;
@@ -9,4 +9,3 @@ export interface Database {
   deleteAnimal: (id: number) => Promise<boolean>;
   disconnect: () => Promise<void>;
 }
-

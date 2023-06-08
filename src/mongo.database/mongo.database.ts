@@ -1,20 +1,20 @@
 import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
-import { AppService } from "../app.service";
-const { MongoClient } = require("mongodb");
+import { MongoClient } from "mongodb";
 
-export class MongoDatabase implements Database  {
-  constructor(private readonly appService: AppService) {
+export class MongoDatabase implements Database {
+  private client: MongoClient;
 
+  constructor(private readonly databaseUrl: string) {
+    this.client = new MongoClient(databaseUrl);
   }
+
   async connect(): Promise<void> {
-    const client = new MongoClient(this.appService.databaseUrl);
-    await client.connect();
+    await this.client.connect();
     return Promise.resolve(undefined);
   }
 
   createAnimal(animal: Animal): Promise<number> {
-
     return Promise.resolve(0);
   }
 
@@ -38,4 +38,3 @@ export class MongoDatabase implements Database  {
     return Promise.resolve(false);
   }
 }
-
