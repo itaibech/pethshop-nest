@@ -6,4 +6,5 @@ export class AnimalController {
   findAll(): string {
     return 'This action returns all animals';
   }
+
 }
