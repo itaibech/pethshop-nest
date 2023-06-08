@@ -8,12 +8,12 @@ import { MysqlDatabase } from "../mysql.database/mysql.database";
 @Injectable()
 export class DatabaseService {
   private database: Database;
-  private databaseType: string;
-  private databaseUrl: string;
-  private collectionName:string;
-  private databaseName:string;
-  private databaseUser:string;
-  private databasePassword:string;
+  private readonly databaseType: string;
+  private readonly databaseUrl: string;
+  private readonly collectionName:string;
+  private readonly databaseName:string;
+  private readonly databaseUser:string;
+  private readonly databasePassword:string;
 
   constructor(private readonly appService: AppService) {
     this.databaseType = appService.environment.parsed['DATABASE_TYPE'];
@@ -24,13 +24,18 @@ export class DatabaseService {
     this.databasePassword = appService.environment.parsed['DATABASE_PASSWORD'];
 
     if (this.databaseType === 'mongoDB') {
-      this.database = new MongoDatabase(this.databaseUrl);
+      this.database = new MongoDatabase(this.databaseUrl,
+        this.databaseName,
+        this.collectionName);
     } else {
       this.database = new MysqlDatabase(this.databaseUrl,
         this.databaseUser,this.databasePassword,this.databaseName);
     }
   }
-  connect: () => Promise<void>;
+
+  connect():Promise<void> {
+    return this.database.connect();
+  }
   getAllAnimals: () => Promise<Animal[]>;
   getAnimalById: (id: number) => Promise<Animal | null>;
   createAnimal: (animal: Animal) => Promise<number>;
