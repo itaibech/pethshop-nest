@@ -57,7 +57,7 @@ export class MockDatabase implements Database {
     this.animals = this.animals.filter(function(obj) {
       return obj.id !== id;
     });
-    return Promise.resolve(false);
+    return Promise.resolve(true);
   }
 
   disconnect(): Promise<void> {
@@ -79,8 +79,21 @@ export class MockDatabase implements Database {
   updateAnimal(id: number, animal: Animal): Promise<boolean> {
     console.log("update animal by Id from mock database");
     let elementIndex = this.animals.findIndex(item => item.id === id);
-    this.animals[elementIndex] = animal;
+    let oldAnimal =  this.animals[elementIndex];
+    this.animals[elementIndex] = { ...oldAnimal, ...animal };
     return Promise.resolve(true);
+  }
+
+  findAnimals(params: Animal): Promise<Animal[]> {
+    let result: Animal[] = this.animals.filter((obj) => {
+      for (const key in params) {
+        if (params.hasOwnProperty(key) && obj[key] != params[key]) {
+          return false;
+        }
+      }
+      return true;
+    });
+    return Promise.resolve(result);
   }
 
 }

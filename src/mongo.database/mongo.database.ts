@@ -69,4 +69,8 @@ export class MongoDatabase implements Database {
     }
     return Promise.resolve(updateResult);
   }
+
+  findAnimals(params: Animal): Promise<Animal[]> {
+    return Promise.resolve([]);
+  }
 }

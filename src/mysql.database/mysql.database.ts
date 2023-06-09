@@ -56,4 +56,8 @@ export class MysqlDatabase implements Database {
   updateAnimal(id: number, animal: Animal): Promise<boolean> {
     return Promise.resolve(false);
   }
+
+  findAnimals(params: Animal): Promise<Animal[]> {
+    return Promise.resolve([]);
+  }
 }

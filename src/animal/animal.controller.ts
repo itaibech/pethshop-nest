@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Put, Query, Res } from "@nestjs/common";
 import { DatabaseService } from "../database/database.service";
 import { Animal } from "./animal.interface";
 
@@ -10,13 +10,17 @@ export class AnimalController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getAllAnimals(): Promise<Animal[]> {
-    return this.databaseService.getAllAnimals();
+  async getAllAnimals(@Query() params: Animal): Promise<Animal[]> {
+    if (params && Object.keys(params).length !== 0) {
+      return this.databaseService.findAnimals(params);
+    } else {
+      return this.databaseService.getAllAnimals();
+    }
   }
 
   @Get(":id")
   @HttpCode(HttpStatus.OK)
-  async findOneAnimal(@Param("id") id: string): Promise<Animal> {
+  async getAnimalById(@Param("id") id: string): Promise<Animal> {
     return this.databaseService.getAnimalById(Number(id));
   }
 

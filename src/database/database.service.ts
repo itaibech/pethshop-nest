@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Query } from "@nestjs/common";
 import { AppService } from "../app.service";
 import { Animal } from "../animal/animal.interface";
 import { Database } from "./database.interface";
@@ -57,12 +57,18 @@ export class DatabaseService {
   }
 
   deleteAnimal(id: number): Promise<boolean> {
-    return this.database.deleteAnimal(id);  }
+    return this.database.deleteAnimal(id);
+  }
 
   disconnect(): Promise<void> {
     return this.database.disconnect();
   }
+
+  findAnimals(params: Animal): Promise<Animal[]> {
+    return this.database.findAnimals(params);
+  }
+
   async onModuleDestroy() {
-    await this.disconnect()
+    await this.disconnect();
   }
 }
