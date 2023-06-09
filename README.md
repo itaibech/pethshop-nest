@@ -47,6 +47,17 @@ $ npm run start:prod
 
 ## Test
 
+Adding a new dog 
+
+send POST Request with postman use this data
+  {
+"type": "dog",
+"age": 5,
+"name": "Pit",
+"breed": "Bulldog",
+"color": "Black"
+}
+
 ```bash
 # unit tests
 $ npm run test

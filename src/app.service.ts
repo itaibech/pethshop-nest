@@ -15,6 +15,6 @@ export class AppService {
   }
 
   getHello(): string {
-    return "Hello Petshop Store Clients!";
+    return "Hello Pet-shop Store Clients!";
   }
 }

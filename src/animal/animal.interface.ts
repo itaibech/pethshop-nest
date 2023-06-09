@@ -1,3 +1,4 @@
+
 export interface Animal {
   type: string;
   id: number;
