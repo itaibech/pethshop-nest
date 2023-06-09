@@ -8,32 +8,32 @@ export class MockDatabase implements Database {
       id: 1,
       age: 3.5,
       name: "moco",
-      breed: "Bulldog",
-      color: "White"
+      color: "White",
+      attributes:[{name:"breed",value:"Bulldog"}]
     },
     {
       type: "dog",
       id: 2,
       age: 1,
       name: "Luna",
-      breed: "Poodle",
-      color: "Black"
+      color: "Black",
+      attributes:[{name:"breed",value:"Bulldog"}]
     },
     {
       type: "dog",
       id: 3,
       age: 2,
       name: "Catch",
-      breed: "Siberian Husky",
-      color: "Brown"
+      color: "Brown",
+      attributes:[{name:"breed",value:"Siberian Husky"}]
     },
     {
       type: "dog",
       id: 4,
       age: 1.5,
       name: "Charlie",
-      breed: "Chihuahua",
-      color: "black & white"
+      color: "black & white",
+      attributes:[{name:"breed",value:"Chihuahua"}]
     }
   ];
 

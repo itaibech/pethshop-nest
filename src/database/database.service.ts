@@ -1,4 +1,4 @@
-import { Injectable, Query } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { AppService } from "../app.service";
 import { Animal } from "../animal/animal.interface";
 import { Database } from "./database.interface";
@@ -11,6 +11,7 @@ export class DatabaseService {
   private database: Database;
   private readonly databaseType: string;
   private readonly databaseUrl: string;
+  private readonly databasePort: string;
   private readonly collectionName: string;
   private readonly databaseName: string;
   private readonly databaseUser: string;
@@ -19,6 +20,7 @@ export class DatabaseService {
   constructor(private readonly appService: AppService) {
     this.databaseType = appService.environment.parsed["DATABASE_TYPE"];
     this.databaseUrl = appService.environment.parsed["DATABASE_URL"];
+    this.databasePort = appService.environment.parsed["DATABASE_PORT"];
     this.databaseName = appService.environment.parsed["DATABASE_NAME"];
     this.collectionName = appService.environment.parsed["COLLECTION_NAME"];
     this.databaseUser = appService.environment.parsed["DATABASE_USER"];
@@ -28,9 +30,19 @@ export class DatabaseService {
       this.database = new MongoDatabase(this.databaseUrl,
         this.databaseName,
         this.collectionName);
+      this.connect().then(()=> {
+        console.log("DatabaseService :: Connected to the mongoDB server.");
+      }).catch(()=>{
+        console.error("DatabaseService :: Cannot Connect to mongoDB server.");
+      });
     } else if (this.databaseType === "mySQL") {
-      this.database = new MysqlDatabase(this.databaseUrl,
+      this.database = new MysqlDatabase(this.databaseUrl,this.databasePort,
         this.databaseUser, this.databasePassword, this.databaseName);
+      this.connect().then(()=> {
+        console.log("DatabaseService :: Connected to the mySQL server.");
+      }).catch(()=>{
+        console.error("DatabaseService :: Cannot Connect to mySQL server.");
+      });
     } else if (this.databaseType === "mockDB") {
       this.database = new MockDatabase();
     }

@@ -8,29 +8,28 @@ export class MysqlDatabase implements Database {
   private connection: Connection;
 
   constructor(private readonly databaseUrl: string,
+              private readonly databasePort: string,
               private readonly databaseUser: string,
               private readonly databasePassword: string,
               private readonly databaseName: string) {
     this.connection = mysql.createConnection({
       host: databaseUrl,
+      port: databasePort,
       user: databaseUser,
       password: databasePassword,
       database: databaseName
     });
   }
 
-  connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.connection.connect(function(err: QueryError) {
-        if (err) {
-          return console.error("error: " + err.message);
-          reject(err);
-        } else {
-          console.log("Connected to the MySQL server.");
-          resolve();
-        }
-      });
+  async connect(): Promise<void> {
+    this.connection.connect(function(err: QueryError) {
+      if (err) {
+        return console.error("error: " + err.message);
+      } else {
+        console.log("Connected to the MySQL server.");
+      }
     });
+    return Promise.resolve();
   }
 
   createAnimal(animal: Animal): Promise<number> {
