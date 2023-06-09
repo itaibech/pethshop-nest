@@ -47,6 +47,43 @@ $ npm run start:prod
 
 ## Test
 
+Adding a new dog 
+
+send POST Request with postman use this data
+```bash
+POST http://localhost:3000/animal
+```
+
+```bash
+{
+  "type": "dog",
+  "age": 5,
+  "name": "Pit",
+  "breed": "Bulldog",
+  "color": "Black"
+}
+```
+Updating an existing Dog
+
+```bash
+PUT http://localhost:3000/animal/3
+```
+
+```bash
+ {
+  "type": "dog",
+  "age": 4,
+  "name": "updatedName",
+  "breed": "updatedBreed",
+  "color": "updatedColor"
+  }
+```
+delete an existing dog
+
+```bash
+DELETE http://localhost:3000/animal/3
+```
+
 ```bash
 # unit tests
 $ npm run test
@@ -58,16 +95,29 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+Get all dogs in the shop
+
+```bash
+GET http://localhost:3000/animal
+```
+
+Find a dogs which age = 2
+
+```bash
+GET http://localhost:3000/animal?age=2
+```
+
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - [Itai Bechor](itai.bechor@gmail.com)
+- LinkedIn - (https://www.linkedin.com/in/itaibechor/)
 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+Pet shop is [MIT licensed](LICENSE).
