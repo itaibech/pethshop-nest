@@ -1,6 +1,6 @@
 import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
-import { Connection, Query, QueryError, RowDataPacket } from "mysql2";
+import { Connection, QueryError } from "mysql2";
 import { AnimalAttributes } from "../animal/animal.attributes";
 
 const mysql = require("mysql");
@@ -73,7 +73,6 @@ export class MysqlDatabase implements Database {
     this.connection.end();
     return Promise.resolve(undefined);
   }
-
   getAllAnimals(): Promise<Animal[]> {
     return new Promise((resolve, reject) => {
       const query = `SELECT a.id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value
@@ -97,7 +96,6 @@ export class MysqlDatabase implements Database {
             animalMap.set(animalId, animal);
             animals.push(animal);
           }
-
           if (row.attribute_name && row.attribute_value) {
             const attribute: AnimalAttributes = {
               name: row.attribute_name,
@@ -151,26 +149,29 @@ export class MysqlDatabase implements Database {
       updateAnimalParams.push(id);
       this.connection.query(updateAnimalQuery, updateAnimalParams, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        // Update AnimalAttributes table (if necessary)
-        if (animal.attributes) {
-          for (const attribute of animal.attributes) {
-            const updateAttributeQuery = `UPDATE AnimalAttributes
-                                          SET attribute_value = ?
-                                          WHERE animal_id = ? AND attribute_name = ?`;
-
-            // Execute the update query for each attribute
-            this.connection.query(updateAttributeQuery, [
-              attribute.value,
-              id,
-              attribute.name
-            ], (err: QueryError | null, result: any) => {
-              if (err) reject(err);
-            });
-          }
-        }
+        this.updateAnimalAttributes(animal, id, reject);
         resolve(result);
       });
     });
+  }
+
+  private updateAnimalAttributes(animal: Animal, id: number, reject: (reason?: any) => void) {
+    if (animal.attributes) {
+      for (const attribute of animal.attributes) {
+        const updateAttributeQuery = `UPDATE AnimalAttributes
+                                          SET attribute_value = ?
+                                          WHERE animal_id = ? AND attribute_name = ?`;
+
+        // Execute the update query for each attribute
+        this.connection.query(updateAttributeQuery, [
+          attribute.value,
+          id,
+          attribute.name
+        ], (err: QueryError | null, result: any) => {
+          if (err) reject(err);
+        });
+      }
+    }
   }
 
   findAnimals(params: Animal): Promise<Animal[]> {

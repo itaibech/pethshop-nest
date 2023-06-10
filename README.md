@@ -104,7 +104,22 @@ GET http://localhost:3000/animal
 Find a dogs which age = 2
 
 ```bash
-GET http://localhost:3000/animal?age=2
+GET http://localhost:3000/animal?type=dog&age=2
+```
+Find a dogs which age >= 2 and <=10
+
+```bash
+GET http://localhost:3000/animal?type=dog&age[gte]=2&age[lte]=10
+```
+Find a dogs which age >= 2 and <=5 and breed is not Bulldog
+
+```bash
+GET http://localhost:3000/animal?type=dog&age[gte]=2&age[lte]=5&breed[not]=Bulldog
+```
+Find a dogs which age > 1 and < 4 and breed is not Bulldog
+
+```bash
+GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog
 ```
 
 
