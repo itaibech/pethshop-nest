@@ -56,11 +56,11 @@ POST http://localhost:3000/animal
 
 ```bash
 {
-  "type": "dog",
-  "age": 5,
-  "name": "Pit",
-  "breed": "Bulldog",
-  "color": "Black"
+    "type": "dog",
+    "age": 3.5,
+    "name": "moco",
+    "color": "White",
+    "attributes":[{"name":"breed","value":"Bulldog"}]
 }
 ```
 Updating an existing Dog
@@ -74,8 +74,8 @@ PUT http://localhost:3000/animal/3
   "type": "dog",
   "age": 4,
   "name": "updatedName",
-  "breed": "updatedBreed",
-  "color": "updatedColor"
+  "color": "updatedColor",
+  "attributes":[{"name":"breed","value":"updatedBreed"}]
   }
 ```
 delete an existing dog
