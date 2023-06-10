@@ -78,36 +78,42 @@ export class MysqlDatabase implements Database {
       const query = `SELECT a.id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value
                      FROM Animals a
                      LEFT JOIN AnimalAttributes aa ON a.id = aa.animal_id`;
-      const animals: Animal[] = [];
-      const animalMap = new Map<number, Animal>();
+
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        for (const row of result) {
-          const animalId = row.id;
-          if (!animalMap.has(animalId)) {
-            const animal: Animal = {
-              id: animalId,
-              name: row.name,
-              type: row.type,
-              color: row.color,
-              age: row.age,
-              attributes: []
-            };
-            animalMap.set(animalId, animal);
-            animals.push(animal);
-          }
-          if (row.attribute_name && row.attribute_value) {
-            const attribute: AnimalAttributes = {
-              name: row.attribute_name,
-              value: row.attribute_value
-            };
-            const animal = animalMap.get(animalId);
-            animal?.attributes.push(attribute);
-          }
-        }
+        const animals = this.mapResultToAnimalsObject(result);
         resolve(animals);
       });
     })
+  }
+
+  private mapResultToAnimalsObject(result: any) {
+    const animals: Animal[] = [];
+    const animalMap = new Map<number, Animal>();
+    for (const row of result) {
+      const animalId = row.id;
+      if (!animalMap.has(animalId)) {
+        const animal: Animal = {
+          id: animalId,
+          name: row.name,
+          type: row.type,
+          color: row.color,
+          age: row.age,
+          attributes: []
+        };
+        animalMap.set(animalId, animal);
+        animals.push(animal);
+      }
+      if (row.attribute_name && row.attribute_value) {
+        const attribute: AnimalAttributes = {
+          name: row.attribute_name,
+          value: row.attribute_value
+        };
+        const animal = animalMap.get(animalId);
+        animal?.attributes.push(attribute);
+      }
+    }
+    return animals;
   }
 
   getAnimalById(id: number): Promise<Animal | null> {
@@ -118,7 +124,8 @@ export class MysqlDatabase implements Database {
                      WHERE a.id = ${id}`;
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        resolve(result);
+        const animals = this.mapResultToAnimalsObject(result);
+        resolve(animals[0]);
       });
     })
   }
@@ -173,8 +180,57 @@ export class MysqlDatabase implements Database {
       }
     }
   }
+  private isSimpleProperty(property: string) {
+    return property === 'type' ||  property === 'name' || property === 'age' || property === 'color';
+  }
+  findAnimals(searchParams: Animal): Promise<Animal[]> {
+    return new Promise((resolve, reject) => {
+      let query = `SELECT a.id, a.name, a.type, a.color, a.age ,aa.attribute_name, aa.attribute_value  
+                   FROM Animals a
+                   JOIN AnimalAttributes aa ON a.id = aa.animal_id
+                   WHERE 1=1`;
+      const queryParams: any[] = [];
 
-  findAnimals(params: Animal): Promise<Animal[]> {
-    return Promise.resolve([]);
+      for (const property in searchParams) {
+        let isSimpleProperty:boolean = this.isSimpleProperty(property);
+        if (searchParams.hasOwnProperty(property)) {
+          if (typeof searchParams[property] === 'string') {
+            query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property],'=');
+          } else if (typeof searchParams[property] === 'object') {
+            if (searchParams[property].gte) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].gte,'>=');
+            }
+            if (searchParams[property].gt) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].gt,'>');
+            }
+            if (searchParams[property].lte) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].lte,'<=');
+            }
+            if (searchParams[property].lt) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].lt,'<');
+            }
+            if (searchParams[property].not) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].not,'!=');
+            }
+          }
+        }
+      }
+      this.connection.query(query, queryParams, (err: QueryError | null, result: any) => {
+        if (err) reject(err);
+        const animals = this.mapResultToAnimalsObject(result);
+        resolve(animals);
+      });
+    });
+  }
+
+  private createQueryByType(isSimpleProperty: boolean, query: string, property: string, queryParams: any[], value, sign: string) {
+    if (isSimpleProperty) {
+      query += ` AND (a.${property} ${sign} ? )`;
+      queryParams.push(value);
+    } else {
+      query += ` AND (aa.attribute_name = ? AND aa.attribute_value ${sign} ?)`;
+      queryParams.push(property, value);
+    }
+    return query;
   }
 }
