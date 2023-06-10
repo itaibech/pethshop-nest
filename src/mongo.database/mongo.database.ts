@@ -1,6 +1,6 @@
 import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
-import { Collection, Db, MongoClient } from "mongodb";
+import { Collection, Db, DeleteResult, MongoClient } from "mongodb";
 
 export class MongoDatabase implements Database {
   private client: MongoClient;
@@ -27,8 +27,8 @@ export class MongoDatabase implements Database {
 
   async deleteAnimal(id: number): Promise<boolean> {
     const query = { id: id };
-    const result = await this.collection.deleteOne(query);
-    return Promise.resolve(false);
+    const result:DeleteResult = await this.collection.deleteOne(query);
+    return Promise.resolve(result.acknowledged);
   }
 
   async disconnect(): Promise<void> {
