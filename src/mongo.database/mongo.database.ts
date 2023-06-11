@@ -99,7 +99,7 @@ export class MongoDatabase implements Database {
             filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].lt, "$lt");
           }
           if (searchParams[property].not) {
-            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].not, "!=");
+            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].not, "$ne");
           }
         }
       }
@@ -127,11 +127,21 @@ export class MongoDatabase implements Database {
   private createQueryByType(isSimpleProperty: boolean, filter: Filter<any>, property: string, value, sign: string) {
 
     if (isSimpleProperty) {
-      filter[property] = this.isNumber(value) ? Number(value) : value;
+      if (sign === "=") {
+        filter[property] = this.isNumber(value) ? Number(value) : value;
+      } else {
+        if (!filter[property]) {
+          filter[property] = { [sign]: this.isNumber(value) ? Number(value) : value };
+        } else {
+          filter[property][sign] = this.isNumber(value) ? Number(value) : value;
+        }
+      }
     } else {
-      let data: object = {};
-      data[sign] = this.isNumber(value) ? Number(value) : value;
-      filter[property] = { data };
+      if (sign === "=") {
+        filter["attributes"] = { $elemMatch: { name: property, value: value } };
+      } else {
+        filter["attributes"] = { $elemMatch: { name: property, value: { [sign]: value } } };
+      }
     }
     return filter;
   }
