@@ -21,7 +21,7 @@ export class AnimalController {
   @Get(":id")
   @HttpCode(HttpStatus.OK)
   async getAnimalById(@Param("id") id: string): Promise<Animal> {
-    return this.databaseService.getAnimalById(Number(id));
+    return this.databaseService.getAnimalById(id);
   }
 
   @Post()
@@ -32,11 +32,11 @@ export class AnimalController {
 
   @Put(":id")
   update(@Param("id") id: string, @Body() updatedAnimal: Animal) {
-    return this.databaseService.updateAnimal(Number(id), updatedAnimal);
+    return this.databaseService.updateAnimal(id, updatedAnimal);
   }
 
   @Delete(":id")
   remove(@Param("id") id: string) {
-    return this.databaseService.deleteAnimal(Number(id));
+    return this.databaseService.deleteAnimal(id);
   }
 }

@@ -32,8 +32,8 @@ export class DatabaseService {
         this.collectionName);
       this.connect().then(()=> {
         console.log("DatabaseService :: Connected to the mongoDB server.");
-      }).catch(()=>{
-        console.error("DatabaseService :: Cannot Connect to mongoDB server.");
+      }).catch((err)=>{
+        console.error("DatabaseService :: Cannot Connect to mongoDB server." + err);
       });
     } else if (this.databaseType === "mySQL") {
       this.database = new MysqlDatabase(this.databaseUrl,this.databasePort,
@@ -56,19 +56,19 @@ export class DatabaseService {
     return this.database.getAllAnimals();
   }
 
-  getAnimalById(id: number): Promise<Animal | null> {
+  getAnimalById(id: string): Promise<Animal | null> {
     return this.database.getAnimalById(id);
   }
 
-  createAnimal(animal: Animal): Promise<number> {
+  createAnimal(animal: Animal): Promise<any> {
     return this.database.createAnimal(animal);
   }
 
-  updateAnimal(id: number, animal: Animal): Promise<boolean> {
+  updateAnimal(id: string, animal: Animal): Promise<boolean> {
     return this.database.updateAnimal(id, animal);
   }
 
-  deleteAnimal(id: number): Promise<boolean> {
+  deleteAnimal(id: string): Promise<boolean> {
     return this.database.deleteAnimal(id);
   }
 

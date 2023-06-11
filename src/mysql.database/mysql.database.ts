@@ -33,7 +33,7 @@ export class MysqlDatabase implements Database {
     return Promise.resolve();
   }
 
-  createAnimal(animal: Animal): Promise<number> {
+  createAnimal(animal: Animal): Promise<any> {
     return new Promise((resolve, reject) => {
       let animalId;
       const insertQuery = `INSERT INTO Animals (name, type, color, age)
@@ -49,13 +49,13 @@ export class MysqlDatabase implements Database {
             if (err) reject(err);
           });
         }
-        resolve(animalId);
+        resolve(result);
       });
     });
   }
 
 
-  deleteAnimal(id: number): Promise<boolean> {
+  deleteAnimal(id: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const deleteAttributeQuery  = `DELETE FROM AnimalAttributes WHERE animal_id = ${id};`;
       const deleteAnimalQuery = `DELETE FROM Animals WHERE id = ${id}`;
@@ -75,9 +75,9 @@ export class MysqlDatabase implements Database {
   }
   getAllAnimals(): Promise<Animal[]> {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value
+      const query = `SELECT a._id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value
                      FROM Animals a
-                     LEFT JOIN AnimalAttributes aa ON a.id = aa.animal_id`;
+                     LEFT JOIN AnimalAttributes aa ON a._id = aa.animal_id`;
 
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
@@ -91,10 +91,10 @@ export class MysqlDatabase implements Database {
     const animals: Animal[] = [];
     const animalMap = new Map<number, Animal>();
     for (const row of result) {
-      const animalId = row.id;
+      const animalId = row._id;
       if (!animalMap.has(animalId)) {
         const animal: Animal = {
-          id: animalId,
+          _id: animalId,
           name: row.name,
           type: row.type,
           color: row.color,
@@ -116,12 +116,12 @@ export class MysqlDatabase implements Database {
     return animals;
   }
 
-  getAnimalById(id: number): Promise<Animal | null> {
+  getAnimalById(id: string): Promise<Animal | null> {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value  
+      const query = `SELECT a._id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value  
                      FROM Animals a
-                     JOIN AnimalAttributes aa ON a.id = aa.animal_id
-                     WHERE a.id = ${id}`;
+                     JOIN AnimalAttributes aa ON a._id = aa.animal_id
+                     WHERE a._id = ${id}`;
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
         const animals = this.mapResultToAnimalsObject(result);
@@ -130,7 +130,7 @@ export class MysqlDatabase implements Database {
     })
   }
 
-  updateAnimal(id: number, animal: Animal): Promise<boolean> {
+  updateAnimal(id: string, animal: Animal): Promise<boolean> {
     return new Promise((resolve, reject) => {
       let updateAnimalQuery = `UPDATE Animals SET `;
       const updateAnimalParams: any[] = [];
@@ -162,7 +162,7 @@ export class MysqlDatabase implements Database {
     });
   }
 
-  private updateAnimalAttributes(animal: Animal, id: number, reject: (reason?: any) => void) {
+  private updateAnimalAttributes(animal: Animal, id: string, reject: (reason?: any) => void) {
     if (animal.attributes) {
       for (const attribute of animal.attributes) {
         const updateAttributeQuery = `UPDATE AnimalAttributes
@@ -185,9 +185,9 @@ export class MysqlDatabase implements Database {
   }
   findAnimals(searchParams: Animal): Promise<Animal[]> {
     return new Promise((resolve, reject) => {
-      let query = `SELECT a.id, a.name, a.type, a.color, a.age ,aa.attribute_name, aa.attribute_value  
+      let query = `SELECT a._id, a.name, a.type, a.color, a.age ,aa.attribute_name, aa.attribute_value  
                    FROM Animals a
-                   JOIN AnimalAttributes aa ON a.id = aa.animal_id
+                   JOIN AnimalAttributes aa ON a._id = aa.animal_id
                    WHERE 1=1`;
       const queryParams: any[] = [];
 
