@@ -44,15 +44,62 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+# Test
 
-## Test
+```bash
+# unit tests
+$ npm run test
 
-Adding a new dog 
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
+# How to work with the API
+
+## Definitions in file environment.env
+
+environment file for mySQL
+```bash
+# API
+API_TOKEN=myUniqueApiToken
+
+#Database Type 
+DATABASE_TYPE=mySQL
+# Database
+DATABASE_NAME=sql12624569
+DATABASE_PORT=3306
+COLLECTION_NAME=animalsCollection
+DATABASE_URL=sql12.freesqldatabase.com
+DATABASE_USER=xxxxx
+DATABASE_PASSWORD=xxxx
+```
+environment file for mongoDB
+
+```bash
+# API
+API_TOKEN=myUniqueApiToken
+
+#Database Type
+DATABASE_TYPE=mongoDb
+# Database
+DATABASE_NAME=Petshop_store_database
+DATABASE_PORT=3306
+COLLECTION_NAME=Animals
+DATABASE_URL=mongodb+srv://xxx:xxx@cluster0.zyujh4k.mongodb.net/?retryWrites=true&w=majority
+DATABASE_USER=xxxxx
+DATABASE_PASSWORD=xxxx
+```
+
+## Adding a new dog 
 
 send POST Request with postman use this data
 ```bash
 POST http://localhost:3000/animal
 ```
+Body
 
 ```bash
 {
@@ -68,7 +115,7 @@ Updating an existing Dog
 ```bash
 PUT http://localhost:3000/animal/3
 ```
-
+BODY
 ```bash
  {
   "type": "dog",
@@ -82,17 +129,6 @@ delete an existing dog
 
 ```bash
 DELETE http://localhost:3000/animal/3
-```
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 
 Get all dogs in the shop
