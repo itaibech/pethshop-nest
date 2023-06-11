@@ -2,6 +2,7 @@ import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
 import { Connection, QueryError } from "mysql2";
 import { AnimalAttributes } from "../animal/animal.attributes";
+import { Utils } from "../utils/utils";
 
 const mysql = require("mysql");
 
@@ -47,6 +48,7 @@ export class MysqlDatabase implements Database {
                                         VALUES (${animalId}, '${attribute.name}', '${attribute.value}')`;
           this.connection.query(attributeInsertQuery, (err: QueryError | null, result: any) => {
             if (err) reject(err);
+            resolve(result);
           });
         }
         resolve(result);
@@ -57,13 +59,13 @@ export class MysqlDatabase implements Database {
 
   deleteAnimal(id: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      const deleteAttributeQuery  = `DELETE FROM AnimalAttributes WHERE animal_id = ${id};`;
+      const deleteAttributeQuery = `DELETE FROM AnimalAttributes WHERE animal_id = ${id};`;
       const deleteAnimalQuery = `DELETE FROM Animals WHERE _id = ${id}`;
-      this.connection.query(deleteAttributeQuery, (err: QueryError | null, result: any) => {
+      this.connection.query(deleteAttributeQuery, (err: QueryError | null, result1: any) => {
         if (err) reject(err);
-        this.connection.query(deleteAnimalQuery, (err: QueryError | null, result: any) => {
+        this.connection.query(deleteAnimalQuery, (err: QueryError | null, result2: any) => {
           if (err) reject(err);
-          resolve(result);
+          resolve(result1 && result2);
         });
       });
     });
@@ -81,13 +83,13 @@ export class MysqlDatabase implements Database {
 
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        const animals = this.mapResultToAnimalsObject(result);
+        const animals = MysqlDatabase.mapResultToAnimalsObject(result);
         resolve(animals);
       });
     })
   }
 
-  private mapResultToAnimalsObject(result: any) {
+  private static mapResultToAnimalsObject(result: any) {
     const animals: Animal[] = [];
     const animalMap = new Map<number, Animal>();
     for (const row of result) {
@@ -104,10 +106,10 @@ export class MysqlDatabase implements Database {
         animalMap.set(animalId, animal);
         animals.push(animal);
       }
-      if (row.attribute_name && row.attribute_value) {
+      if (row['attribute_name'] && row['attribute_value']) {
         const attribute: AnimalAttributes = {
-          name: row.attribute_name,
-          value: row.attribute_value
+          name: row['attribute_name'],
+          value: row['attribute_value']
         };
         const animal = animalMap.get(animalId);
         animal?.attributes.push(attribute);
@@ -124,7 +126,7 @@ export class MysqlDatabase implements Database {
                      WHERE a._id = ${id}`;
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        const animals = this.mapResultToAnimalsObject(result);
+        const animals = MysqlDatabase.mapResultToAnimalsObject(result);
         resolve(animals[0]);
       });
     })
@@ -174,14 +176,11 @@ export class MysqlDatabase implements Database {
           attribute.value,
           id,
           attribute.name
-        ], (err: QueryError | null, result: any) => {
+        ], (err: QueryError | null) => {
           if (err) reject(err);
         });
       }
     }
-  }
-  private isSimpleProperty(property: string) {
-    return property === 'type' ||  property === 'name' || property === 'age' || property === 'color';
   }
   findAnimals(searchParams: Animal): Promise<Animal[]> {
     return new Promise((resolve, reject) => {
@@ -192,38 +191,38 @@ export class MysqlDatabase implements Database {
       const queryParams: any[] = [];
 
       for (const property in searchParams) {
-        let isSimpleProperty:boolean = this.isSimpleProperty(property);
+        let isSimpleProperty:boolean = Utils.isSimpleProperty(property);
         if (searchParams.hasOwnProperty(property)) {
           if (typeof searchParams[property] === 'string') {
-            query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property],'=');
+            query = MysqlDatabase.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property],'=');
           } else if (typeof searchParams[property] === 'object') {
             if (searchParams[property].gte) {
-              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].gte,'>=');
+              query = MysqlDatabase.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].gte,'>=');
             }
             if (searchParams[property].gt) {
-              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].gt,'>');
+              query = MysqlDatabase.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].gt,'>');
             }
             if (searchParams[property].lte) {
-              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].lte,'<=');
+              query = MysqlDatabase.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].lte,'<=');
             }
             if (searchParams[property].lt) {
-              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].lt,'<');
+              query = MysqlDatabase.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].lt,'<');
             }
             if (searchParams[property].not) {
-              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].not,'!=');
+              query = MysqlDatabase.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].not,'!=');
             }
           }
         }
       }
       this.connection.query(query, queryParams, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        const animals = this.mapResultToAnimalsObject(result);
+        const animals = MysqlDatabase.mapResultToAnimalsObject(result);
         resolve(animals);
       });
     });
   }
 
-  private createQueryByType(isSimpleProperty: boolean, query: string, property: string, queryParams: any[], value, sign: string) {
+  private static createQueryByType(isSimpleProperty: boolean, query: string, property: string, queryParams: any[], value, sign: string) {
     if (isSimpleProperty) {
       query += ` AND (a.${property} ${sign} ? )`;
       queryParams.push(value);

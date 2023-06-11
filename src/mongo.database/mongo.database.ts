@@ -1,6 +1,7 @@
 import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
 import { Collection, Db, Filter, MongoClient, ObjectId } from "mongodb";
+import { Utils } from "../utils/utils";
 
 export class MongoDatabase implements Database {
   private client: MongoClient;
@@ -81,25 +82,25 @@ export class MongoDatabase implements Database {
     let filter: Filter<any> = {};
 
     for (const property in searchParams) {
-      let isSimpleProperty: boolean = this.isSimpleProperty(property);
+      let isSimpleProperty: boolean = Utils.isSimpleProperty(property);
       if (searchParams.hasOwnProperty(property)) {
         if (typeof searchParams[property] === "string") {
-          filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property], "=");
+          filter = MongoDatabase.createQueryByType(isSimpleProperty, filter, property, searchParams[property], "=");
         } else if (typeof searchParams[property] === "object") {
           if (searchParams[property].gte) {
-            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].gte, "$gte");
+            filter = MongoDatabase.createQueryByType(isSimpleProperty, filter, property, searchParams[property].gte, "$gte");
           }
           if (searchParams[property].gt) {
-            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].gt, "$gt");
+            filter = MongoDatabase.createQueryByType(isSimpleProperty, filter, property, searchParams[property].gt, "$gt");
           }
           if (searchParams[property].lte) {
-            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].lte, "$lte");
+            filter = MongoDatabase.createQueryByType(isSimpleProperty, filter, property, searchParams[property].lte, "$lte");
           }
           if (searchParams[property].lt) {
-            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].lt, "$lt");
+            filter = MongoDatabase.createQueryByType(isSimpleProperty, filter, property, searchParams[property].lt, "$lt");
           }
           if (searchParams[property].not) {
-            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].not, "$ne");
+            filter = MongoDatabase.createQueryByType(isSimpleProperty, filter, property, searchParams[property].not, "$ne");
           }
         }
       }
@@ -110,30 +111,18 @@ export class MongoDatabase implements Database {
     } catch (err) {
       console.error(`Something went wrong trying to find the documents: ${err}\n`);
     }
-
   }
 
-  private isSimpleProperty(property: string) {
-    return property === "type" || property === "name" || property === "age" || property === "color";
-  }
-
-  private isNumber(value: any): boolean {
-    if (typeof value === "string") {
-      return !isNaN(Number(value));
-    }
-    return false;
-  }
-
-  private createQueryByType(isSimpleProperty: boolean, filter: Filter<any>, property: string, value, sign: string) {
+  private static createQueryByType(isSimpleProperty: boolean, filter: Filter<any>, property: string, value, sign: string) {
 
     if (isSimpleProperty) {
       if (sign === "=") {
-        filter[property] = this.isNumber(value) ? Number(value) : value;
+        filter[property] = Utils.GetNumberOrString(value);
       } else {
         if (!filter[property]) {
-          filter[property] = { [sign]: this.isNumber(value) ? Number(value) : value };
+          filter[property] = { [sign]: Utils.GetNumberOrString(value) };
         } else {
-          filter[property][sign] = this.isNumber(value) ? Number(value) : value;
+          filter[property][sign] = Utils.GetNumberOrString(value);
         }
       }
     } else {
@@ -145,4 +134,6 @@ export class MongoDatabase implements Database {
     }
     return filter;
   }
+
+
 }
