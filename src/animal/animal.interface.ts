@@ -2,7 +2,7 @@ import { AnimalAttributes } from "./animal.attributes";
 
 export interface Animal {
   type: string;
-  id: number;
+  _id: any;
   name: string;
   age: number;
   color: string;

@@ -1,11 +1,11 @@
 import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
-import { Collection, Db, DeleteResult, MongoClient } from "mongodb";
+import { Collection, Db, DeleteResult, MongoClient, ObjectId } from "mongodb";
 
 export class MongoDatabase implements Database {
   private client: MongoClient;
   private database: Db;
-  private collection: Collection<Animal>;
+  private collection: Collection<any>;
 
   constructor(private readonly databaseUrl: string,
               private readonly databaseName: string,
@@ -15,20 +15,27 @@ export class MongoDatabase implements Database {
     this.collection = this.database.collection(collectionName);
 
   }
+
   async connect(): Promise<void> {
     await this.client.connect();
     return Promise.resolve(undefined);
   }
 
-  async createAnimal(animal: Animal): Promise<number> {
-    await this.collection.insertOne(animal);
-    return Promise.resolve(0);
+  async createAnimal(animal: Animal): Promise<any> {
+    let result = await this.collection.insertOne(animal);
+    return Promise.resolve(result);
   }
 
-  async deleteAnimal(id: number): Promise<boolean> {
-    const query = { id: id };
-    const result:DeleteResult = await this.collection.deleteOne(query);
-    return Promise.resolve(result.acknowledged);
+  async deleteAnimal(id: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const query = { _id: new ObjectId(id) };
+      this.collection.deleteOne(query).then(result => {
+        resolve(result.acknowledged);
+      }).catch((err) => {
+        console.error(`Something went wrong trying to delete the documents: ${err}\n`);
+        reject(err);
+      });
+    });
   }
 
   async disconnect(): Promise<void> {
@@ -37,7 +44,7 @@ export class MongoDatabase implements Database {
   }
 
   async getAllAnimals(): Promise<Animal[]> {
-    let animals : Animal[] = null;
+    let animals: Animal[] = null;
     try {
       animals = await this.collection.find().toArray() as Animal[];
       console.log();
@@ -47,27 +54,28 @@ export class MongoDatabase implements Database {
     return Promise.resolve(animals);
   }
 
-  async getAnimalById(id: number): Promise<Animal | null> {
-    const findQuery = { id: id };
-    let animal : Animal = null;
-    try {
-      animal = await this.collection.findOne(findQuery) as Animal;
-      console.log();
-    } catch (err) {
-      console.error(`Something went wrong trying to find the documents: ${err}\n`);
-    }
-    return Promise.resolve(animal);
+  getAnimalById(id: string): Promise<Animal | null> {
+    return new Promise((resolve, reject) => {
+      const findQuery = { _id: new ObjectId(id) };
+      this.collection.findOne(findQuery).then(animal => {
+        resolve(animal);
+      }).catch((err) => {
+        console.error(`Something went wrong trying to find the documents: ${err}\n`);
+        reject(err);
+      });
+    });
   }
 
-  async updateAnimal(id: number, animal: Animal): Promise<boolean> {
-    const filter = { id: id };
-    let updateResult;
-    try {
-      updateResult = await this.collection.updateOne(filter, { $set: animal });
-    } catch (err) {
-      console.error(`Something went wrong trying to update one document: ${err}\n`);
-    }
-    return Promise.resolve(updateResult);
+  updateAnimal(id: string, animal: Animal): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const filter = { _id: new ObjectId(id) };
+      this.collection.updateOne(filter, { $set: animal }).then(result => {
+        resolve(result.acknowledged);
+      }).catch((err) => {
+        console.error(`Something went wrong trying to update the documents: ${err}\n`);
+        reject(err);
+      });
+    });
   }
 
   findAnimals(params: Animal): Promise<Animal[]> {

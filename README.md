@@ -44,15 +44,60 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+# Test
 
-## Test
+```bash
+# unit tests
+$ npm run test
 
-Adding a new dog 
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
+# How to work with the API
+
+## Definitions in file environment.env
+
+environment file for mySQL
+```bash
+# API
+API_TOKEN=myUniqueApiToken
+
+#Database Type 
+DATABASE_TYPE=mySQL
+# Database
+DATABASE_NAME=sql12624569
+DATABASE_PORT=3306
+COLLECTION_NAME=animalsCollection
+DATABASE_URL=sql12.freesqldatabase.com
+DATABASE_USER=xxxxx
+DATABASE_PASSWORD=xxxx
+```
+environment file for mongoDB
+
+```bash
+# API
+#Database Type Options: mongoDB  , mockDB , mySQL
+DATABASE_TYPE=mongoDB
+# Database
+DATABASE_NAME=Petshop_store_database
+DATABASE_PORT=3306
+COLLECTION_NAME=Animals
+DATABASE_URL=mongodb+srv://xxxx:xxxx@cluster0.zyujh4k.mongodb.net/?retryWrites=true&w=majority
+DATABASE_USER=xxxxx
+DATABASE_PASSWORD=xxxxx
+```
+
+## Adding a new dog 
 
 send POST Request with postman use this data
 ```bash
 POST http://localhost:3000/animal
 ```
+Body
 
 ```bash
 {
@@ -68,7 +113,7 @@ Updating an existing Dog
 ```bash
 PUT http://localhost:3000/animal/3
 ```
-
+BODY
 ```bash
  {
   "type": "dog",
@@ -84,44 +129,111 @@ delete an existing dog
 DELETE http://localhost:3000/animal/3
 ```
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-Get all dogs in the shop
+Get all animals in the shop
 
 ```bash
 GET http://localhost:3000/animal
 ```
 
-Find a dogs which age = 2
+Find dogs which age = 2
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age=2
 ```
-Find a dogs which age >= 2 and <=10
+Find dogs which age >= 2 and <=10
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gte]=2&age[lte]=10
 ```
-Find a dogs which age >= 2 and <=5 and breed is not Bulldog
+Find dogs which age >= 2 and <=5 and breed is not Bulldog
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gte]=2&age[lte]=5&breed[not]=Bulldog
 ```
-Find a dogs which age > 1 and < 4 and breed is not Bulldog
+Find dogs which age > 1 and < 4 and breed is not Bulldog
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog
 ```
 
+find dogs which age > 1 and < 4 and breed is not Bulldog , order by age descending
+
+```bash
+GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog&order_by=age&direction=DESC
+```
+find dogs which age > 1 and < 4 and breed is not Bulldog , order by age ascending
+
+```bash
+GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog&order_by=age&direction=ASC
+```
+
+## Sample Data
+
+```bash
+{
+    "type": "dog",
+    "age": 3.5,
+    "name": "moco",
+    "color": "White",
+    "attributes":[{"name":"breed","value":"Bulldog"}]
+}
+
+{
+    "type": "dog",
+    "age": 3.5,
+    "name": "moco",
+    "color": "White",
+    "attributes": [{ "name": "breed", "value": "Bulldog" }]
+}
+
+{
+    "type": "dog",
+    "age": 1,
+    "name": "Luna",
+    "color": "Black",
+    "attributes": [{ "name": "breed", "value": "Bulldog" }]
+}
+
+{
+    "type": "dog",
+    "age": 2,
+    "name": "Catch",
+    "color": "Brown",
+    "attributes": [{ "name": "breed", "value": "Siberian Husky" }]
+}
+
+{
+    "type": "dog",
+    "age": 1.5,
+    "name": "Charlie",
+    "color": "black & white",
+    "attributes": [{ "name": "breed", "value": "Chihuahua" }]
+}
+```
+
+
+## MySQL Creation of tables
+
+use this query to create SQL Database
+
+```bash
+-- Table: Animals
+CREATE TABLE Animals (
+_id INT AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+type VARCHAR(100) NOT NULL,
+color VARCHAR(100) NOT NULL,
+age INT
+);
+
+CREATE TABLE AnimalAttributes (
+id INT AUTO_INCREMENT PRIMARY KEY,
+animal_id INT,
+attribute_name VARCHAR(100) NOT NULL,
+attribute_value VARCHAR(100),
+FOREIGN KEY (animal_id) REFERENCES Animals(_id)
+);
+```
 
 ## Support
 

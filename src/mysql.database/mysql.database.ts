@@ -33,7 +33,7 @@ export class MysqlDatabase implements Database {
     return Promise.resolve();
   }
 
-  createAnimal(animal: Animal): Promise<number> {
+  createAnimal(animal: Animal): Promise<any> {
     return new Promise((resolve, reject) => {
       let animalId;
       const insertQuery = `INSERT INTO Animals (name, type, color, age)
@@ -49,13 +49,13 @@ export class MysqlDatabase implements Database {
             if (err) reject(err);
           });
         }
-        resolve(animalId);
+        resolve(result);
       });
     });
   }
 
 
-  deleteAnimal(id: number): Promise<boolean> {
+  deleteAnimal(id: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const deleteAttributeQuery  = `DELETE FROM AnimalAttributes WHERE animal_id = ${id};`;
       const deleteAnimalQuery = `DELETE FROM Animals WHERE id = ${id}`;
@@ -75,55 +75,62 @@ export class MysqlDatabase implements Database {
   }
   getAllAnimals(): Promise<Animal[]> {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value
+      const query = `SELECT a._id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value
                      FROM Animals a
-                     LEFT JOIN AnimalAttributes aa ON a.id = aa.animal_id`;
-      const animals: Animal[] = [];
-      const animalMap = new Map<number, Animal>();
+                     LEFT JOIN AnimalAttributes aa ON a._id = aa.animal_id`;
+
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        for (const row of result) {
-          const animalId = row.id;
-          if (!animalMap.has(animalId)) {
-            const animal: Animal = {
-              id: animalId,
-              name: row.name,
-              type: row.type,
-              color: row.color,
-              age: row.age,
-              attributes: []
-            };
-            animalMap.set(animalId, animal);
-            animals.push(animal);
-          }
-          if (row.attribute_name && row.attribute_value) {
-            const attribute: AnimalAttributes = {
-              name: row.attribute_name,
-              value: row.attribute_value
-            };
-            const animal = animalMap.get(animalId);
-            animal?.attributes.push(attribute);
-          }
-        }
+        const animals = this.mapResultToAnimalsObject(result);
         resolve(animals);
       });
     })
   }
 
-  getAnimalById(id: number): Promise<Animal | null> {
+  private mapResultToAnimalsObject(result: any) {
+    const animals: Animal[] = [];
+    const animalMap = new Map<number, Animal>();
+    for (const row of result) {
+      const animalId = row._id;
+      if (!animalMap.has(animalId)) {
+        const animal: Animal = {
+          _id: animalId,
+          name: row.name,
+          type: row.type,
+          color: row.color,
+          age: row.age,
+          attributes: []
+        };
+        animalMap.set(animalId, animal);
+        animals.push(animal);
+      }
+      if (row.attribute_name && row.attribute_value) {
+        const attribute: AnimalAttributes = {
+          name: row.attribute_name,
+          value: row.attribute_value
+        };
+        const animal = animalMap.get(animalId);
+        animal?.attributes.push(attribute);
+      }
+    }
+    return animals;
+  }
+
+  getAnimalById(id: string): Promise<Animal | null> {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a.id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value  
+      const query = `SELECT a._id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value  
                      FROM Animals a
-                     JOIN AnimalAttributes aa ON a.id = aa.animal_id
-                     WHERE a.id = ${id}`;
+                     JOIN AnimalAttributes aa ON a._id = aa.animal_id
+                     WHERE a._id = ${id}`;
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        resolve(result);
+        const animals = this.mapResultToAnimalsObject(result);
+        resolve(animals[0]);
       });
     })
   }
 
-  updateAnimal(id: number, animal: Animal): Promise<boolean> {
+  updateAnimal(id: string, animal: Animal): Promise<boolean> {
     return new Promise((resolve, reject) => {
       let updateAnimalQuery = `UPDATE Animals SET `;
       const updateAnimalParams: any[] = [];
@@ -155,7 +162,7 @@ export class MysqlDatabase implements Database {
     });
   }
 
-  private updateAnimalAttributes(animal: Animal, id: number, reject: (reason?: any) => void) {
+  private updateAnimalAttributes(animal: Animal, id: string, reject: (reason?: any) => void) {
     if (animal.attributes) {
       for (const attribute of animal.attributes) {
         const updateAttributeQuery = `UPDATE AnimalAttributes
@@ -173,8 +180,57 @@ export class MysqlDatabase implements Database {
       }
     }
   }
+  private isSimpleProperty(property: string) {
+    return property === 'type' ||  property === 'name' || property === 'age' || property === 'color';
+  }
+  findAnimals(searchParams: Animal): Promise<Animal[]> {
+    return new Promise((resolve, reject) => {
+      let query = `SELECT a._id, a.name, a.type, a.color, a.age ,aa.attribute_name, aa.attribute_value  
+                   FROM Animals a
+                   JOIN AnimalAttributes aa ON a._id = aa.animal_id
+                   WHERE 1=1`;
+      const queryParams: any[] = [];
 
-  findAnimals(params: Animal): Promise<Animal[]> {
-    return Promise.resolve([]);
+      for (const property in searchParams) {
+        let isSimpleProperty:boolean = this.isSimpleProperty(property);
+        if (searchParams.hasOwnProperty(property)) {
+          if (typeof searchParams[property] === 'string') {
+            query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property],'=');
+          } else if (typeof searchParams[property] === 'object') {
+            if (searchParams[property].gte) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].gte,'>=');
+            }
+            if (searchParams[property].gt) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].gt,'>');
+            }
+            if (searchParams[property].lte) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].lte,'<=');
+            }
+            if (searchParams[property].lt) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].lt,'<');
+            }
+            if (searchParams[property].not) {
+              query = this.createQueryByType(isSimpleProperty, query, property, queryParams, searchParams[property].not,'!=');
+            }
+          }
+        }
+      }
+      this.connection.query(query, queryParams, (err: QueryError | null, result: any) => {
+        if (err) reject(err);
+        const animals = this.mapResultToAnimalsObject(result);
+        resolve(animals);
+      });
+    });
+  }
+
+  private createQueryByType(isSimpleProperty: boolean, query: string, property: string, queryParams: any[], value, sign: string) {
+    if (isSimpleProperty) {
+      query += ` AND (a.${property} ${sign} ? )`;
+      queryParams.push(value);
+    } else {
+      query += ` AND (aa.attribute_name = ? AND aa.attribute_value ${sign} ?)`;
+      queryParams.push(property, value);
+    }
+    return query;
   }
 }
