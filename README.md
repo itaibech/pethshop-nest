@@ -159,12 +159,12 @@ GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog
 find dogs which age > 1 and < 4 and breed is not Bulldog , order by age descending //TODO
 
 ```bash
-GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog&order_by=age&direction=DESC
+GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog&orderBy=age&direction=DESC
 ```
-find dogs which age > 1 and < 4 and breed is not Bulldog , order by age ascending //TODO
+find dogs which age > 1 order by age ascending //TODO
 
 ```bash
-GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog&order_by=age&direction=ASC
+GET http://localhost:3000/animal?type=dog&age[gt]=1&orderBy=age&direction=ASC
 ```
 
 ## Sample Data

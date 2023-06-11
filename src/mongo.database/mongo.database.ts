@@ -78,7 +78,7 @@ export class MongoDatabase implements Database {
     });
   }
 
-  async findAnimals(searchParams: Animal): Promise<Animal[]> {
+  async findAnimals(searchParams: any, orderBy: string, direction: string): Promise<Animal[]> {
     let filter: Filter<any> = {};
 
     for (const property in searchParams) {

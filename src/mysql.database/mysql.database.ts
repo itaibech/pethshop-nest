@@ -182,7 +182,7 @@ export class MysqlDatabase implements Database {
       }
     }
   }
-  findAnimals(searchParams: Animal): Promise<Animal[]> {
+  findAnimals(searchParams: any, orderBy: string, direction: string): Promise<Animal[]> {
     return new Promise((resolve, reject) => {
       let query = `SELECT a._id, a.name, a.type, a.color, a.age ,aa.attribute_name, aa.attribute_value  
                    FROM Animals a
@@ -214,6 +214,14 @@ export class MysqlDatabase implements Database {
           }
         }
       }
+      if (orderBy && direction) {
+        if (Utils.isSimpleProperty(orderBy)) {
+          query += " ORDER BY  a." + orderBy + " " + direction
+        }else {
+          query += " ORDER BY  aa.attribute_value " + direction
+        }
+      }
+
       this.connection.query(query, queryParams, (err: QueryError | null, result: any) => {
         if (err) reject(err);
         const animals = MysqlDatabase.mapResultToAnimalsObject(result);
