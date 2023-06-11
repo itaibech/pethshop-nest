@@ -1,6 +1,6 @@
 import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
-import { Collection, Db, DeleteResult, MongoClient, ObjectId } from "mongodb";
+import { Collection, Db, Filter, MongoClient, ObjectId } from "mongodb";
 
 export class MongoDatabase implements Database {
   private client: MongoClient;
@@ -47,7 +47,6 @@ export class MongoDatabase implements Database {
     let animals: Animal[] = null;
     try {
       animals = await this.collection.find().toArray() as Animal[];
-      console.log();
     } catch (err) {
       console.error(`Something went wrong trying to find the documents: ${err}\n`);
     }
@@ -78,7 +77,62 @@ export class MongoDatabase implements Database {
     });
   }
 
-  findAnimals(params: Animal): Promise<Animal[]> {
-    return Promise.resolve([]);
+  async findAnimals(searchParams: Animal): Promise<Animal[]> {
+    let filter: Filter<any> = {};
+
+    for (const property in searchParams) {
+      let isSimpleProperty: boolean = this.isSimpleProperty(property);
+      if (searchParams.hasOwnProperty(property)) {
+        if (typeof searchParams[property] === "string") {
+          filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property], "=");
+        } else if (typeof searchParams[property] === "object") {
+          if (searchParams[property].gte) {
+            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].gte, "$gte");
+          }
+          if (searchParams[property].gt) {
+            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].gt, "$gt");
+          }
+          if (searchParams[property].lte) {
+            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].lte, "$lte");
+          }
+          if (searchParams[property].lt) {
+            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].lt, "$lt");
+          }
+          if (searchParams[property].not) {
+            filter = this.createQueryByType(isSimpleProperty, filter, property, searchParams[property].not, "!=");
+          }
+        }
+      }
+    }
+    try {
+      let animals = await this.collection.find(filter).toArray() as Animal[];
+      return Promise.resolve(animals);
+    } catch (err) {
+      console.error(`Something went wrong trying to find the documents: ${err}\n`);
+    }
+
+  }
+
+  private isSimpleProperty(property: string) {
+    return property === "type" || property === "name" || property === "age" || property === "color";
+  }
+  private isNumber(value: any): boolean {
+    if (typeof value === "string") {
+      return !isNaN(Number(value));
+    }
+    return false;
+  }
+
+  private createQueryByType(isSimpleProperty: boolean, filter: Filter<any>, property: string, value, sign: string) {
+
+    if (isSimpleProperty) {
+      filter[property] = this.isNumber(value) ? Number(value) : value;
+    } else {
+      let data: object = {};
+      data[sign] = this.isNumber(value) ? Number(value) : value;
+      ;
+      filter[property] = { data };
+    }
+    return filter;
   }
 }
