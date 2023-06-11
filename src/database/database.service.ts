@@ -76,8 +76,9 @@ export class DatabaseService {
     return this.database.disconnect();
   }
 
-  findAnimals(params: Animal): Promise<Animal[]> {
-    return this.database.findAnimals(params);
+  findAnimals(searchParams: any): Promise<Animal[]> {
+    const { orderBy, direction, ...updatedSearchParams } = searchParams;
+    return this.database.findAnimals(updatedSearchParams, orderBy, direction);
   }
 
   async onModuleDestroy() {
