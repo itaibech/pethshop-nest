@@ -116,6 +116,7 @@ export class MongoDatabase implements Database {
   private isSimpleProperty(property: string) {
     return property === "type" || property === "name" || property === "age" || property === "color";
   }
+
   private isNumber(value: any): boolean {
     if (typeof value === "string") {
       return !isNaN(Number(value));
@@ -130,7 +131,6 @@ export class MongoDatabase implements Database {
     } else {
       let data: object = {};
       data[sign] = this.isNumber(value) ? Number(value) : value;
-      ;
       filter[property] = { data };
     }
     return filter;
