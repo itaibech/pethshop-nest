@@ -123,7 +123,7 @@ BODY
   "attributes":[{"name":"breed","value":"updatedBreed"}]
   }
 ```
-delete an existing dog
+delete an existing dog by id
 
 ```bash
 DELETE http://localhost:3000/animal/3
