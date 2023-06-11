@@ -58,7 +58,7 @@ export class MysqlDatabase implements Database {
   deleteAnimal(id: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const deleteAttributeQuery  = `DELETE FROM AnimalAttributes WHERE animal_id = ${id};`;
-      const deleteAnimalQuery = `DELETE FROM Animals WHERE id = ${id}`;
+      const deleteAnimalQuery = `DELETE FROM Animals WHERE _id = ${id}`;
       this.connection.query(deleteAttributeQuery, (err: QueryError | null, result: any) => {
         if (err) reject(err);
         this.connection.query(deleteAnimalQuery, (err: QueryError | null, result: any) => {
@@ -152,7 +152,7 @@ export class MysqlDatabase implements Database {
       // Remove the trailing comma and space
       updateAnimalQuery = updateAnimalQuery.slice(0, -2);
       // Add the WHERE clause for the specific animal ID
-      updateAnimalQuery += ` WHERE id = ?`;
+      updateAnimalQuery += ` WHERE _id = ?`;
       updateAnimalParams.push(id);
       this.connection.query(updateAnimalQuery, updateAnimalParams, (err: QueryError | null, result: any) => {
         if (err) reject(err);
