@@ -23,8 +23,12 @@
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 ## Description
+This is a Pet shop API , 
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+you can add/remove/delete or find animals from the shop catalog
+
+The application was build using Nest framework TypeScript
+[Nest](https://github.com/nestjs/nest) 
 
 ## Installation
 
@@ -156,12 +160,12 @@ Find dogs which age > 1 and < 4 and breed is not Bulldog
 GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog
 ```
 
-find dogs which age > 1 and < 4 and breed is not Bulldog , order by age descending //TODO
+find dogs which age > 1 and < 4 and breed is not Bulldog , order by age descending
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog&orderBy=age&direction=DESC
 ```
-find dogs which age > 1 order by age ascending //TODO
+find dogs which age > 1 order by age ascending
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gt]=1&orderBy=age&direction=ASC
@@ -175,15 +179,17 @@ GET http://localhost:3000/animal?type=dog&age[gt]=1&orderBy=age&direction=ASC
     "age": 3.5,
     "name": "moco",
     "color": "White",
-    "attributes":[{"name":"breed","value":"Bulldog"}]
+    "attributes":[{"name":"breed","value":"Bulldog"},
+    {"name": "tailLength", "value": "1"}]
 }
 
 {
     "type": "dog",
-    "age": 3.5,
+    "age": 4,
     "name": "moco",
     "color": "White",
-    "attributes": [{ "name": "breed", "value": "Bulldog" }]
+    "attributes": [{ "name": "breed", "value": "Bulldog" },
+    {"name": "tailLength", "value": "2"}]
 }
 
 {
@@ -191,7 +197,8 @@ GET http://localhost:3000/animal?type=dog&age[gt]=1&orderBy=age&direction=ASC
     "age": 1,
     "name": "Luna",
     "color": "Black",
-    "attributes": [{ "name": "breed", "value": "Bulldog" }]
+    "attributes": [{ "name": "breed", "value": "Bulldog" },
+   {"name": "tailLength", "value": "3"}]
 }
 
 {
@@ -199,15 +206,17 @@ GET http://localhost:3000/animal?type=dog&age[gt]=1&orderBy=age&direction=ASC
     "age": 2,
     "name": "Catch",
     "color": "Brown",
-    "attributes": [{ "name": "breed", "value": "Siberian Husky" }]
+    "attributes": [{ "name": "breed", "value": "Siberian Husky" },
+    {"name": "tailLength", "value": "4"}]
 }
 
 {
     "type": "dog",
-    "age": 1.5,
+    "age": 5.5,
     "name": "Charlie",
     "color": "black & white",
-    "attributes": [{ "name": "breed", "value": "Chihuahua" }]
+    "attributes": [{ "name": "breed", "value": "Chihuahua" },
+    {"name": "tailLength", "value": "6"}]
 }
 ```
 

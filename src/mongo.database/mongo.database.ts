@@ -106,10 +106,24 @@ export class MongoDatabase implements Database {
       }
     }
     try {
-      let animals = await this.collection.find(filter).toArray() as Animal[];
+      let animals = await this.findAndSortIfNeeded(orderBy, direction, filter);
       return Promise.resolve(animals);
     } catch (err) {
       console.error(`Something went wrong trying to find the documents: ${err}\n`);
+    }
+  }
+
+  private async findAndSortIfNeeded(orderBy: string, direction: string, filter: any) {
+    if (orderBy && direction) {
+      let sortQuery: any = {};
+      if (direction === "ASC") {
+        sortQuery = { [orderBy]: 1 }; // Sort by field in ascending order
+      } else {
+        sortQuery = { [orderBy]: -1 }; // Sort by field in descending order
+      }
+      return (await this.collection.find(filter).sort(sortQuery).toArray()) as Animal[];
+    } else {
+      return await this.collection.find(filter).toArray() as Animal[];
     }
   }
 

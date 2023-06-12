@@ -7,26 +7,29 @@ export class MockDatabase implements Database {
     {
       type: "dog",
       _id: "1",
-      age: 3.5,
+      age: 2,
       name: "moco",
       color: "White",
-      attributes: [{ name: "breed", value: "Bulldog" }]
+      attributes: [{ name: "breed", value: "Bulldog" },
+        {name: "tailLength", value: "1"}]
     },
     {
       type: "dog",
       _id: "2",
-      age: 1,
+      age: 3,
       name: "Luna",
       color: "Black",
-      attributes: [{ name: "breed", value: "Bulldog" }]
+      attributes: [{ name: "breed", value: "Bulldog" },
+        {name: "tailLength", value: "3"}]
     },
     {
       type: "dog",
       _id: "3",
-      age: 2,
+      age: 4,
       name: "Catch",
       color: "Brown",
-      attributes: [{ name: "breed", value: "Siberian Husky" }]
+      attributes: [{ name: "breed", value: "Siberian Husky" },
+        {name: "tailLength", value: "6"}]
     },
     {
       type: "dog",
@@ -34,7 +37,8 @@ export class MockDatabase implements Database {
       age: 1.5,
       name: "Charlie",
       color: "black & white",
-      attributes: [{ name: "breed", value: "Chihuahua" }]
+      attributes: [{ name: "breed", value: "Chihuahua" },
+        {name: "tailLength", value: "5"}]
     }
   ];
 
