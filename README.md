@@ -171,6 +171,11 @@ find dogs which age > 1 order by age ascending
 GET http://localhost:3000/animal?type=dog&age[gt]=1&orderBy=age&direction=ASC
 ```
 
+find dogs which tailLength >= 3 order by tailLength ascending (inner attributes)
+
+```bash
+GET http://localhost:3000/animal?type=dog&tailLength[gt]=3&orderBy=tailLength&direction=ASC
+```
 ## Sample Data
 
 ```bash

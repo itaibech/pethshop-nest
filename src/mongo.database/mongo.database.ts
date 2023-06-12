@@ -106,11 +106,41 @@ export class MongoDatabase implements Database {
       }
     }
     try {
-      let animals = await this.findAndSortIfNeeded(orderBy, direction, filter);
+      let animals = [];
+      if (orderBy && direction && !Utils.isSimpleProperty(orderBy)) {
+        animals = await this.findAndSortByAttributes(orderBy, direction, filter);
+      } else {
+        animals = await this.findAndSortIfNeeded(orderBy, direction, filter);
+      }
       return Promise.resolve(animals);
     } catch (err) {
       console.error(`Something went wrong trying to find the documents: ${err}\n`);
     }
+  }
+
+  private async findAndSortByAttributes(orderBy: string, direction: string, filter: any) {
+    let directionNumber: number = direction === "ASC" ? 1 : -1;
+    let orderByValue: string = `${orderBy}.value`;
+    const pipeline = [
+      {
+        $match: filter
+
+      },
+      {
+        $addFields: {
+          breed: {
+            $filter: {
+              input: "$attributes",
+              cond: { $eq: ["$$this.name", orderBy] }
+            }
+          }
+        }
+      },
+      {
+        $sort: { [orderByValue]: directionNumber }
+      }
+    ];
+    return (await this.collection.aggregate(pipeline).toArray()) as Animal[];
   }
 
   private async findAndSortIfNeeded(orderBy: string, direction: string, filter: any) {
@@ -126,7 +156,6 @@ export class MongoDatabase implements Database {
       return await this.collection.find(filter).toArray() as Animal[];
     }
   }
-
   private static createQueryByType(isSimpleProperty: boolean, filter: Filter<any>, property: string, value, sign: string) {
 
     if (isSimpleProperty) {
