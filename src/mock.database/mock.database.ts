@@ -1,6 +1,7 @@
 import { Database } from "../database/database.interface";
 import { Animal } from "../animal/animal.interface";
 import { AnimalAttributes } from "../animal/animal.attributes";
+import { Utils } from "../utils/utils";
 
 export class MockDatabase implements Database {
   private animals: Animal[] = [
@@ -83,8 +84,8 @@ export class MockDatabase implements Database {
     return Promise.resolve(true);
   }
 
-  findAnimals(searchParams: any): Promise<Animal[]> {
-    const result: Animal[] = this.animals.filter((animal) => {
+  findAnimals(searchParams: any,orderBy: string, direction: string): Promise<Animal[]> {
+    let result: Animal[] = this.animals.filter((animal) => {
       let isValid = true;
       for (const property in searchParams) {
         if (!property) continue;
@@ -116,10 +117,46 @@ export class MockDatabase implements Database {
       }
       return isValid;
     });
-
+    if (orderBy && direction) {
+      result = this.orderArray(result , orderBy,direction);
+    }
     return Promise.resolve(result);
   }
 
+  private orderArray(animals: Animal[], orderBy: string, direction: string): Animal[] {
+    if (Utils.isSimpleProperty(orderBy)) {
+      animals = this.orderBySimpleProperty(animals, direction, orderBy);
+    } else {
+      animals = this.orderByAttributeProperty(animals, direction, orderBy);
+    }
+    return animals;
+  }
+
+  private orderBySimpleProperty(animals: Animal[], direction: string, orderBy: string) {
+    return animals.sort((a, b) => {
+      let simplePropertyA: string = String(a[orderBy]);
+      let simplePropertyB: string = String(b[orderBy]);
+      if (direction == "ASC") {
+
+        return simplePropertyA.localeCompare(simplePropertyB);
+      } else {
+        return simplePropertyB.localeCompare(simplePropertyA);
+      }
+    });
+  }
+
+  private orderByAttributeProperty(animals: Animal[], direction: string, orderBy: string) {
+    return animals.sort((a, b) => {
+      const aAttributeValue = a.attributes.find((attr) => attr.name === orderBy)?.value || "0";
+      const bAttributeValue :string =
+        b.attributes.find((attr) => attr.name === orderBy)?.value || "";
+      if (direction == "ASC") {
+        return aAttributeValue.localeCompare(bAttributeValue);
+      } else {
+        return bAttributeValue.localeCompare(aAttributeValue);
+      }
+    });
+  }
   private getValueFromAnimal(animal: Animal, property: string) {
     let value: string = animal[property];
     if (!value) {
