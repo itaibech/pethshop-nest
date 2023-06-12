@@ -75,23 +75,24 @@ export class MysqlDatabase implements Database {
     this.connection.end();
     return Promise.resolve(undefined);
   }
+
   getAllAnimals(): Promise<Animal[]> {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a._id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value
-                     FROM Animals a
-                     LEFT JOIN AnimalAttributes aa ON a._id = aa.animal_id`;
+      const query = `SELECT animals._id, animals.name, animals.type, animals.color, animals.age, animalAttributes.attribute_name, animalAttributes.attribute_value
+                     FROM Animals animals
+                     LEFT JOIN AnimalAttributes aa ON animals._id = animalAttributes.animal_id`;
 
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        const animals = MysqlDatabase.mapResultToAnimalsObject(result);
+        const animals = MysqlDatabase.mapResultToAnimalsObject(result, null);
         resolve(animals);
       });
-    })
+    });
   }
 
-  private static mapResultToAnimalsObject(result: any) {
-    const animals: Animal[] = [];
-    const animalMap = new Map<number, Animal>();
+  private static mapResultToAnimalsObject(result: any ,orderBy: any) {
+    let animals: Animal[] = [];
+    let animalMap = new Map<number, Animal>();
     for (const row of result) {
       const animalId = row._id;
       if (!animalMap.has(animalId)) {
@@ -115,18 +116,23 @@ export class MysqlDatabase implements Database {
         animal?.attributes.push(attribute);
       }
     }
+    if (orderBy) {
+      animals = animals.sort(
+        (a, b) => orderBy.indexOf(a._id) - orderBy.indexOf(b._id)
+      );
+    }
     return animals;
   }
 
   getAnimalById(id: string): Promise<Animal | null> {
     return new Promise((resolve, reject) => {
-      const query = `SELECT a._id, a.name, a.type, a.color, a.age, aa.attribute_name, aa.attribute_value  
-                     FROM Animals a
-                     JOIN AnimalAttributes aa ON a._id = aa.animal_id
-                     WHERE a._id = ${id}`;
+      const query = `SELECT animals._id, animals.name, animals.type, animals.color, animals.age, animalAttributes.attribute_name, animalAttributes.attribute_value  
+                     FROM Animals animals
+                     JOIN AnimalAttributes aa ON animals._id = animalAttributes.animal_id
+                     WHERE animals._id = ${id}`;
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        const animals = MysqlDatabase.mapResultToAnimalsObject(result);
+        const animals = MysqlDatabase.mapResultToAnimalsObject(result,null);
         resolve(animals[0]);
       });
     })
@@ -183,10 +189,10 @@ export class MysqlDatabase implements Database {
     }
   }
   findAnimals(searchParams: any, orderBy: string, direction: string): Promise<Animal[]> {
-    return new Promise((resolve, reject) => {
-      let query = `SELECT a._id, a.name, a.type, a.color, a.age ,aa.attribute_name, aa.attribute_value  
-                   FROM Animals a
-                   JOIN AnimalAttributes aa ON a._id = aa.animal_id
+    return new Promise(async (resolve, reject) => {
+      let query = `SELECT animals._id, animals.name, animals.type, animals.color, animals.age ,animalAttributes.attribute_name, animalAttributes.attribute_value  
+                   FROM Animals animals
+                   JOIN AnimalAttributes animalAttributes ON animals._id = animalAttributes.animal_id
                    WHERE 1=1`;
       const queryParams: any[] = [];
 
@@ -214,28 +220,41 @@ export class MysqlDatabase implements Database {
           }
         }
       }
+      let orderIds = null;
       if (orderBy && direction) {
         if (Utils.isSimpleProperty(orderBy)) {
-          query += " ORDER BY  a." + orderBy + " " + direction
-        }else {
-          query += " ORDER BY  aa.attribute_value " + direction
+          query += " ORDER BY  animals." + orderBy + " " + direction;
+        } else {
+          orderIds = await this.getOrderIDsForAttributes(orderBy , direction)
         }
       }
 
       this.connection.query(query, queryParams, (err: QueryError | null, result: any) => {
         if (err) reject(err);
-        const animals = MysqlDatabase.mapResultToAnimalsObject(result);
+        const animals = MysqlDatabase.mapResultToAnimalsObject(result,orderIds);
         resolve(animals);
       });
     });
   }
-
+  private getOrderIDsForAttributes(orderBy , direction) {
+    return new Promise((resolve, reject) => {
+      let query = `SELECT Animals._id FROM Animals ` +
+        `JOIN AnimalAttributes ON Animals._id = AnimalAttributes.animal_id ` +
+        `WHERE AnimalAttributes.attribute_name = '${orderBy}' ` +
+        `ORDER BY AnimalAttributes.attribute_value ${direction} `;
+      this.connection.query(query, (err: QueryError | null, result: any) => {
+        if (err) reject(err);
+        let orderIds = result.map(a => a._id);
+        resolve(orderIds);
+      });
+    });
+  }
   private static createQueryByType(isSimpleProperty: boolean, query: string, property: string, queryParams: any[], value, sign: string) {
     if (isSimpleProperty) {
-      query += ` AND (a.${property} ${sign} ? )`;
+      query += ` AND (animals.${property} ${sign} ? )`;
       queryParams.push(value);
     } else {
-      query += ` AND (aa.attribute_name = ? AND aa.attribute_value ${sign} ?)`;
+      query += ` AND (animalAttributes.attribute_name = ? AND animalAttributes.attribute_value ${sign} ?)`;
       queryParams.push(property, value);
     }
     return query;
