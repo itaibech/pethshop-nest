@@ -31,6 +31,8 @@ The application was build using Nest framework TypeScript
 [Nest](https://github.com/nestjs/nest) 
 
 ## Installation
+install nodeJS if needed for npm :
+https://nodejs.org/en/download
 
 ```bash
 $ npm install
@@ -112,7 +114,7 @@ Body
     "attributes":[{"name":"breed","value":"Bulldog"}]
 }
 ```
-Updating an existing Dog
+## Updating an existing Dog
 
 ```bash
 PUT http://localhost:3000/animal/3
@@ -127,7 +129,7 @@ BODY
   "attributes":[{"name":"breed","value":"updatedBreed"}]
   }
 ```
-delete an existing dog by id
+## delete an existing dog by id
 
 ```bash
 DELETE http://localhost:3000/animal/3
@@ -139,44 +141,44 @@ Get all animals in the shop
 GET http://localhost:3000/animal
 ```
 
-Find dogs which age = 2
+## Find dogs which age = 2
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age=2
 ```
-Find dogs which age >= 2 and <=10
+## Find dogs which age >= 2 and <=10
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gte]=2&age[lte]=10
 ```
-Find dogs which age >= 2 and <=5 and breed is not Bulldog
+## Find dogs which age >= 2 and <=5 and breed is not Bulldog
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gte]=2&age[lte]=5&breed[not]=Bulldog
 ```
-Find dogs which age > 1 and < 4 and breed is not Bulldog
+## Find dogs which age > 1 and < 4 and breed is not Bulldog
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog
 ```
 
-find dogs which age > 1 and < 4 and breed is not Bulldog , order by age descending
+## find dogs which age > 1 and < 4 and breed is not Bulldog , order by age descending
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog&orderBy=age&direction=DESC
 ```
-find dogs which age > 1 order by age ascending
+## find dogs which age > 1 order by age ascending
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gt]=1&orderBy=age&direction=ASC
 ```
 
-find dogs which tailLength >= 3 order by tailLength ascending (inner attributes)
+## find dogs which tailLength >= 3 order by tailLength ascending (inner attributes)
 
 ```bash
 GET http://localhost:3000/animal?type=dog&tailLength[gt]=3&orderBy=tailLength&direction=ASC
 ```
-## Sample Data
+# Sample Data
 
 ```bash
 {
