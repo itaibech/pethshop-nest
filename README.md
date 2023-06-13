@@ -122,7 +122,7 @@ Body
     "name": "Moco",
     "color": "White",
     "attributes":[{"name":"breed","value":"Bulldog"},
-    {"name": "tailLength", "value": "4"}]]
+    {"name": "tailLength", "value": "4"}]
 }
 ```
 ## Updating an existing Dog
