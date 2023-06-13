@@ -28,15 +28,14 @@ export class MongoDatabase implements Database {
   }
 
   async deleteAnimal(id: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const query = { _id: new ObjectId(id) };
-      this.collection.deleteOne(query).then(result => {
-        resolve(result.acknowledged);
-      }).catch((err) => {
-        console.error(`Something went wrong trying to delete the documents: ${err}\n`);
-        reject(err);
-      });
-    });
+    const query = { _id: new ObjectId(id) };
+    try {
+      const result = await this.collection.deleteOne(query);
+      return result.acknowledged;
+    } catch (err) {
+      console.error(`Something went wrong trying to delete the documents: ${err}\n`);
+      throw err;
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -54,28 +53,27 @@ export class MongoDatabase implements Database {
     return Promise.resolve(animals);
   }
 
-  getAnimalById(id: string): Promise<Animal | null> {
-    return new Promise((resolve, reject) => {
-      const findQuery = { _id: new ObjectId(id) };
-      this.collection.findOne(findQuery).then(animal => {
-        resolve(animal);
-      }).catch((err) => {
-        console.error(`Something went wrong trying to find the documents: ${err}\n`);
-        reject(err);
-      });
-    });
+  async getAnimalById(id: string): Promise<Animal | null> {
+    const findQuery = { _id: new ObjectId(id) };
+
+    try {
+      return await this.collection.findOne(findQuery);
+    } catch (err) {
+      console.error(`Something went wrong trying to find the documents: ${err}\n`);
+      throw err;
+    }
   }
 
-  updateAnimal(id: string, animal: Animal): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const filter = { _id: new ObjectId(id) };
-      this.collection.updateOne(filter, { $set: animal }).then(result => {
-        resolve(result.acknowledged);
-      }).catch((err) => {
-        console.error(`Something went wrong trying to update the documents: ${err}\n`);
-        reject(err);
-      });
-    });
+  async updateAnimal(id: string, animal: Animal): Promise<boolean> {
+    const filter = { _id: new ObjectId(id) };
+
+    try {
+      const result = await this.collection.updateOne(filter, { $set: animal });
+      return result.acknowledged;
+    } catch (err) {
+      console.error(`Something went wrong trying to update the documents: ${err}\n`);
+      throw err;
+    }
   }
 
   async findAnimals(searchParams: any, orderBy: string, direction: string): Promise<Animal[]> {
@@ -106,7 +104,7 @@ export class MongoDatabase implements Database {
       }
     }
     try {
-      let animals = [];
+      let animals: any[];
       if (orderBy && direction && !Utils.isSimpleProperty(orderBy)) {
         animals = await this.findAndSortByAttributes(orderBy, direction, filter);
       } else {
@@ -128,7 +126,7 @@ export class MongoDatabase implements Database {
       },
       {
         $addFields: {
-          breed: {
+          [orderBy]: {
             $filter: {
               input: "$attributes",
               cond: { $eq: ["$$this.name", orderBy] }
@@ -145,7 +143,7 @@ export class MongoDatabase implements Database {
 
   private async findAndSortIfNeeded(orderBy: string, direction: string, filter: any) {
     if (orderBy && direction) {
-      let sortQuery: any = {};
+      let sortQuery: any;
       if (direction === "ASC") {
         sortQuery = { [orderBy]: 1 }; // Sort by field in ascending order
       } else {
