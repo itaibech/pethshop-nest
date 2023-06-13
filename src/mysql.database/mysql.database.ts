@@ -80,7 +80,7 @@ export class MysqlDatabase implements Database {
     return new Promise((resolve, reject) => {
       const query = `SELECT animals._id, animals.name, animals.type, animals.color, animals.age, animalAttributes.attribute_name, animalAttributes.attribute_value
                      FROM Animals animals
-                     LEFT JOIN AnimalAttributes aa ON animals._id = animalAttributes.animal_id`;
+                     LEFT JOIN AnimalAttributes animalAttributes ON animals._id = animalAttributes.animal_id`;
 
       this.connection.query(query, (err: QueryError | null, result: any) => {
         if (err) reject(err);
@@ -93,33 +93,35 @@ export class MysqlDatabase implements Database {
   private static mapResultToAnimalsObject(result: any ,orderBy: any) {
     let animals: Animal[] = [];
     let animalMap = new Map<number, Animal>();
-    for (const row of result) {
-      const animalId = row._id;
-      if (!animalMap.has(animalId)) {
-        const animal: Animal = {
-          _id: animalId,
-          name: row.name,
-          type: row.type,
-          color: row.color,
-          age: row.age,
-          attributes: []
-        };
-        animalMap.set(animalId, animal);
-        animals.push(animal);
+    if (result) {
+      for (const row of result) {
+        const animalId = row._id;
+        if (!animalMap.has(animalId)) {
+          const animal: Animal = {
+            _id: animalId,
+            name: row.name,
+            type: row.type,
+            color: row.color,
+            age: row.age,
+            attributes: []
+          };
+          animalMap.set(animalId, animal);
+          animals.push(animal);
+        }
+        if (row['attribute_name'] && row['attribute_value']) {
+          const attribute: AnimalAttributes = {
+            name: row['attribute_name'],
+            value: row['attribute_value']
+          };
+          const animal = animalMap.get(animalId);
+          animal?.attributes.push(attribute);
+        }
       }
-      if (row['attribute_name'] && row['attribute_value']) {
-        const attribute: AnimalAttributes = {
-          name: row['attribute_name'],
-          value: row['attribute_value']
-        };
-        const animal = animalMap.get(animalId);
-        animal?.attributes.push(attribute);
+      if (orderBy) {
+        animals = animals.sort(
+          (a, b) => orderBy.indexOf(a._id) - orderBy.indexOf(b._id)
+        );
       }
-    }
-    if (orderBy) {
-      animals = animals.sort(
-        (a, b) => orderBy.indexOf(a._id) - orderBy.indexOf(b._id)
-      );
     }
     return animals;
   }
