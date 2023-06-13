@@ -121,7 +121,8 @@ Body
     "age": 3.5,
     "name": "Moco",
     "color": "White",
-    "attributes":[{"name":"breed","value":"Bulldog"}]
+    "attributes":[{"name":"breed","value":"Bulldog"},
+    {"name": "tailLength", "value": "4"}]]
 }
 ```
 ## Updating an existing Dog
