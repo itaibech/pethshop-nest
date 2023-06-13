@@ -28,15 +28,14 @@ export class MongoDatabase implements Database {
   }
 
   async deleteAnimal(id: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const query = { _id: new ObjectId(id) };
-      this.collection.deleteOne(query).then(result => {
-        resolve(result.acknowledged);
-      }).catch((err) => {
-        console.error(`Something went wrong trying to delete the documents: ${err}\n`);
-        reject(err);
-      });
-    });
+    const query = { _id: new ObjectId(id) };
+    try {
+      const result = await this.collection.deleteOne(query);
+      return result.acknowledged;
+    } catch (err) {
+      console.error(`Something went wrong trying to delete the documents: ${err}\n`);
+      throw err;
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -66,16 +65,16 @@ export class MongoDatabase implements Database {
     });
   }
 
-  updateAnimal(id: string, animal: Animal): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const filter = { _id: new ObjectId(id) };
-      this.collection.updateOne(filter, { $set: animal }).then(result => {
-        resolve(result.acknowledged);
-      }).catch((err) => {
-        console.error(`Something went wrong trying to update the documents: ${err}\n`);
-        reject(err);
-      });
-    });
+  async updateAnimal(id: string, animal: Animal): Promise<boolean> {
+    const filter = { _id: new ObjectId(id) };
+
+    try {
+      const result = await this.collection.updateOne(filter, { $set: animal });
+      return result.acknowledged;
+    } catch (err) {
+      console.error(`Something went wrong trying to update the documents: ${err}\n`);
+      throw err;
+    }
   }
 
   async findAnimals(searchParams: any, orderBy: string, direction: string): Promise<Animal[]> {
@@ -128,7 +127,7 @@ export class MongoDatabase implements Database {
       },
       {
         $addFields: {
-          breed: {
+          [orderBy]: {
             $filter: {
               input: "$attributes",
               cond: { $eq: ["$$this.name", orderBy] }

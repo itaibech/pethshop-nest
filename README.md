@@ -97,9 +97,19 @@ DATABASE_USER=xxxxx
 DATABASE_PASSWORD=xxxxx
 ```
 
+# Functionality
+
+Send Requests as described below 
+
+## Get all animals in the shop
+
+```bash
+GET http://localhost:3000/animal
+```
+
 ## Adding a new dog 
 
-send POST Request with postman use this data
+
 ```bash
 POST http://localhost:3000/animal
 ```
@@ -109,7 +119,7 @@ Body
 {
     "type": "dog",
     "age": 3.5,
-    "name": "moco",
+    "name": "Moco",
     "color": "White",
     "attributes":[{"name":"breed","value":"Bulldog"}]
 }
@@ -121,25 +131,22 @@ PUT http://localhost:3000/animal/3
 ```
 BODY
 ```bash
- {
+{
   "type": "dog",
   "age": 4,
   "name": "updatedName",
   "color": "updatedColor",
-  "attributes":[{"name":"breed","value":"updatedBreed"}]
-  }
+  "attributes":[{"name":"breed","value":"updatedBreed"},
+  {"name": "tailLength", "value": "2"}]
+}
 ```
-## delete an existing dog by id
+## Delete an existing dog by id
 
 ```bash
 DELETE http://localhost:3000/animal/3
 ```
 
-Get all animals in the shop
 
-```bash
-GET http://localhost:3000/animal
-```
 
 ## Find dogs which age = 2
 
@@ -156,24 +163,24 @@ GET http://localhost:3000/animal?type=dog&age[gte]=2&age[lte]=10
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gte]=2&age[lte]=5&breed[not]=Bulldog
 ```
-## Find dogs which age > 1 and < 4 and breed is not Bulldog
+## Find dogs which age > 2 and < 6 and breed is not Bulldog
 
 ```bash
-GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog
+GET http://localhost:3000/animal?type=dog&age[gt]=2&age[lt]=6&breed[not]=Bulldog
 ```
 
-## find dogs which age > 1 and < 4 and breed is not Bulldog , order by age descending
+## Find dogs which age > 1 and < 4 and breed is not Bulldog , order by age descending
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gt]=1&age[lt]=4&breed[not]=Bulldog&orderBy=age&direction=DESC
 ```
-## find dogs which age > 1 order by age ascending
+## Find dogs which age > 1 order by age ascending
 
 ```bash
 GET http://localhost:3000/animal?type=dog&age[gt]=1&orderBy=age&direction=ASC
 ```
 
-## find dogs which tailLength >= 3 order by tailLength ascending (inner attributes)
+## Find dogs which tailLength >= 3 order by tailLength ascending (inner attributes)
 
 ```bash
 GET http://localhost:3000/animal?type=dog&tailLength[gt]=3&orderBy=tailLength&direction=ASC
@@ -184,7 +191,7 @@ GET http://localhost:3000/animal?type=dog&tailLength[gt]=3&orderBy=tailLength&di
 {
     "type": "dog",
     "age": 3.5,
-    "name": "moco",
+    "name": "Moco",
     "color": "White",
     "attributes":[{"name":"breed","value":"Bulldog"},
     {"name": "tailLength", "value": "1"}]
@@ -193,7 +200,7 @@ GET http://localhost:3000/animal?type=dog&tailLength[gt]=3&orderBy=tailLength&di
 {
     "type": "dog",
     "age": 4,
-    "name": "moco",
+    "name": "Shloki",
     "color": "White",
     "attributes": [{ "name": "breed", "value": "Bulldog" },
     {"name": "tailLength", "value": "2"}]
@@ -224,6 +231,24 @@ GET http://localhost:3000/animal?type=dog&tailLength[gt]=3&orderBy=tailLength&di
     "color": "black & white",
     "attributes": [{ "name": "breed", "value": "Chihuahua" },
     {"name": "tailLength", "value": "6"}]
+}
+
+{
+    "type": "dog",
+    "age": 5,
+    "name": "Moki",
+    "color": "White",
+    "attributes": [{ "name": "breed", "value": "Bulldog" },
+    {"name": "tailLength", "value": "4"}]
+}
+
+{
+    "type": "dog",
+    "age": 5,
+    "name": "Dogli",
+    "color": "White",
+    "attributes": [{ "name": "breed", "value": "Poodle" },
+    {"name": "tailLength", "value": "3"}]
 }
 ```
 
