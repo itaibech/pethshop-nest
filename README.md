@@ -146,7 +146,29 @@ BODY
 DELETE http://localhost:3000/animal/3
 ```
 
+# Find
 
+find symbols are located in query params,
+use with property name:
+(see example in brackets)
+
+=   :   =       (age=3      : age = 3)
+
+gt  :  >        (age[gt]=3  : age > 3)
+
+gte :  >=       (age[gte]=3 : age >= 3)
+
+lt  :  <        (age[lt]=3  : age < 3)
+
+lte :  <=       (age[lte]=3  : age <= 3)
+
+not : !=        (age[not]=3  : age != 3)
+ 
+### sorting
+
+add to the end of query params : orderBy= property and direction = 'ASC' | 'DESC'
+for example :
+orderBy=age&direction=DESC
 
 ## Find dogs which age = 2
 
@@ -222,6 +244,15 @@ GET http://localhost:3000/animal?type=dog&tailLength[gt]=3&orderBy=tailLength&di
     "color": "Brown",
     "attributes": [{ "name": "breed", "value": "Siberian Husky" },
     {"name": "tailLength", "value": "4"}]
+}
+
+{
+    "type": "dog",
+    "age": 3,
+    "name": "Duke",
+    "color": "Brown",
+    "attributes": [{ "name": "breed", "value": "Siberian Husky" },
+    {"name": "tailLength", "value": "5"}]
 }
 
 {
